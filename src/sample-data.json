@@ -1,0 +1,9 @@
+[
+  {
+    "examId": "exam001",
+    "examName": "社内勉強会での発表",
+    "targetDate": "2025-10-14",
+    "character": "毒舌系のフリーター",
+    "slackWebhookUrl": "https://hooks.slack.com/services/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"
+  }
+]
