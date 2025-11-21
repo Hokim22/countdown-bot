@@ -144,10 +144,9 @@ aws logs tail /aws/lambda/countdown-bot --follow
 aws dynamodb scan --table-name exam-countdown
 ```
 
-### API Gateway URL確認
+### Lambda Function URL確認
 ```bash
-cd terraform
-terraform output api_url
+aws lambda get-function-url-config --function-name countdown-bot-register
 ```
 
 ## コスト

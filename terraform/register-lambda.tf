@@ -100,16 +100,19 @@ resource "aws_lambda_function" "register_bot" {
   }
 }
 
-# Lambda実行権限 (API Gateway)
-resource "aws_lambda_permission" "api_gateway" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.register_bot.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.countdown_api.execution_arn}/*/*"
+# Lambda Function URL
+resource "aws_lambda_function_url" "register_url" {
+  function_name      = aws_lambda_function.register_bot.function_name
+  authorization_type = "NONE"
+
+  cors {
+    allow_origins = ["*"]
+    allow_methods = ["POST"]
+    allow_headers = ["content-type"]
+  }
 }
 
 # 出力
-output "api_url" {
-  value = "${aws_api_gateway_deployment.countdown_api.invoke_url}/register"
+output "function_url" {
+  value = aws_lambda_function_url.register_url.function_url
 }

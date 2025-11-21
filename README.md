@@ -43,6 +43,7 @@ countdown-bot/
 ## 月額コスト
 **完全無料（$0/月）**
 - Lambda: 無料枠内（30回/月）
+- Lambda Function URLs: 完全無料
 - DynamoDB: 無料枠内
 - EventBridge: 無料枠内
 - Gemini API: 無料枠内（1,500リクエスト/日）
