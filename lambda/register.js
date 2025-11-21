@@ -12,12 +12,24 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json'
     };
 
-    if (event.httpMethod === 'OPTIONS') {
+    // OPTIONSリクエスト対応
+    if (event.requestContext?.http?.method === 'OPTIONS' || event.httpMethod === 'OPTIONS') {
         return { statusCode: 200, headers, body: '' };
     }
 
     try {
-        const body = JSON.parse(event.body);
+        console.log('Event:', JSON.stringify(event));
+        
+        // Lambda Function URLsの場合、bodyが文字列
+        const body = event.body ? JSON.parse(event.body) : null;
+        
+        if (!body) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'No body provided' })
+            };
+        }
         
         // バリデーション
         if (!body.examName || !body.targetDate || !body.character || !body.notificationType || !body.notificationUrl) {
@@ -27,6 +39,9 @@ exports.handler = async (event) => {
                 body: JSON.stringify({ error: 'Missing required fields' })
             };
         }
+        
+        // 通知時間のデフォルトは9:00 (JST)
+        const notificationTime = body.notificationTime || '09:00';
 
         // 日付チェック
         const targetDate = new Date(body.targetDate);
@@ -47,6 +62,7 @@ exports.handler = async (event) => {
             character: body.character,
             notificationType: body.notificationType,
             notificationUrl: body.notificationUrl,
+            notificationTime,
             createdAt: new Date().toISOString()
         };
 

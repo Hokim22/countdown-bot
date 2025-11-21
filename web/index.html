@@ -104,6 +104,14 @@
                 </small>
             </div>
 
+            <div class="form-group">
+                <label>通知時間 (JST)</label>
+                <input type="time" id="notificationTime" value="09:00">
+                <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                    毎日この時間に通知が届きます（デフォルト: 9:00）
+                </small>
+            </div>
+
             <button type="submit" id="submitBtn">登録する</button>
         </form>
 
@@ -142,7 +150,8 @@
                 targetDate: document.getElementById('targetDate').value,
                 character: document.querySelector('input[name="character"]:checked').value,
                 notificationType: document.getElementById('notificationType').value,
-                notificationUrl: document.getElementById('notificationUrl').value
+                notificationUrl: document.getElementById('notificationUrl').value,
+                notificationTime: document.getElementById('notificationTime').value
             };
 
             try {
