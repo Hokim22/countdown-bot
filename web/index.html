@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>試験カウントダウンBot - 登録</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: border 0.3s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
+        .character-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .character-option { padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s; }
+        .character-option:hover { border-color: #667eea; background: #f5f7ff; }
+        .character-option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .character-option input[type="radio"] { display: none; }
+        button { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+        button:hover { transform: translateY(-2px); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .success { background: #4caf50; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+        .error { background: #f44336; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+        .info { background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #1976d2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 試験カウントダウンBot</h1>
+        <p class="subtitle">AIキャラクターが毎日応援メッセージを送ります</p>
+
+        <div class="info">
+            ✨ 完全無料 | 🎭 8種類のキャラクター | 📱 Slack/LINE/Discord/Teams対応
+        </div>
+
+        <form id="registrationForm">
+            <div class="form-group">
+                <label>試験名 *</label>
+                <input type="text" id="examName" required placeholder="例: AWS認定試験">
+            </div>
+
+            <div class="form-group">
+                <label>試験日 *</label>
+                <input type="date" id="targetDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>キャラクター選択 *</label>
+                <div class="character-grid">
+                    <label class="character-option">
+                        <input type="radio" name="character" value="天真爛漫な友人" required>
+                        <div>😊 天真爛漫な友人</div>
+                    </label>
+                    <label class="character-option">
+                        <input type="radio" name="character" value="毒舌系フリーター">
+                        <div>😏 毒舌系フリーター</div>
+                    </label>
+                    <label class="character-option">
+                        <input type="radio" name="character" value="近所の優しい甘いお姉さん">
+                        <div>🌸 優しいお姉さん</div>
+                    </label>
+                    <label class="character-option">
+                        <input type="radio" name="character" value="推しのアイドル">
+                        <div>✨ 推しのアイドル</div>
+                    </label>
+                    <label class="character-option">
+                        <input type="radio" name="character" value="未来の自分">
+                        <div>🌟 未来の自分</div>
+                    </label>
+                    <label class="character-option">
+                        <input type="radio" name="character" value="競い合うライバル">
+                        <div>😤 ライバル</div>
+                    </label>
+                    <label class="character-option">
+                        <input type="radio" name="character" value="守護霊">
+                        <div>🙏 守護霊</div>
+                    </label>
+                    <label class="character-option">
+                        <input type="radio" name="character" value="温かい家族">
+                        <div>🌿 温かい家族</div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>通知先 *</label>
+                <select id="notificationType" required>
+                    <option value="">選択してください</option>
+                    <option value="slack">Slack</option>
+                    <option value="line">LINE Notify</option>
+                    <option value="discord">Discord</option>
+                    <option value="teams">Microsoft Teams</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Webhook URL / トークン *</label>
+                <input type="text" id="notificationUrl" required placeholder="https://hooks.slack.com/...">
+                <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                    Slack/Discord/Teams: Webhook URL | LINE: トークン
+                </small>
+            </div>
+
+            <button type="submit" id="submitBtn">登録する</button>
+        </form>
+
+        <div class="success" id="successMsg">✅ 登録完了！毎日通知が届きます。</div>
+        <div class="error" id="errorMsg">❌ エラーが発生しました。もう一度お試しください。</div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // キャラクター選択のUI
+        document.querySelectorAll('.character-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.character-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // 最小日付を今日に設定
+        document.getElementById('targetDate').min = new Date().toISOString().split('T')[0];
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = '登録中...';
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            const data = {
+                examName: document.getElementById('examName').value,
+                targetDate: document.getElementById('targetDate').value,
+                character: document.querySelector('input[name="character"]:checked').value,
+                notificationType: document.getElementById('notificationType').value,
+                notificationUrl: document.getElementById('notificationUrl').value
+            };
+
+            try {
+                const response = await fetch('API_GATEWAY_URL_HERE', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    successMsg.style.display = 'block';
+                    form.reset();
+                    document.querySelectorAll('.character-option').forEach(o => o.classList.remove('selected'));
+                } else {
+                    throw new Error('Registration failed');
+                }
+            } catch (error) {
+                errorMsg.style.display = 'block';
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '登録する';
+            }
+        });
+    </script>
+</body>
+</html>

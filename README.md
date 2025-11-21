@@ -15,66 +15,21 @@
 - **Gemini API**: 生成AI応援メッセージ（無料）
 - **Slack**: 通知先
 
-## セットアップ手順
+## 使い方
 
-### 1. Gemini APIキー取得
-1. [Google AI Studio](https://aistudio.google.com/app/apikey) でAPIキーを取得
-2. 無料枠: 15 RPM、1,500 RPD
+### 🌐 Webフォームで登録（推奨）
 
-### 2. 通知先の設定
+1. [Webフォーム](https://YOUR_DOMAIN/web/index.html) にアクセス
+2. 試験情報を入力
+3. キャラクターを選択
+4. 通知先を設定
+5. 登録ボタンをクリック
 
-#### Slack
-1. Slack Appを作成
-2. Incoming Webhookを有効化
-3. Webhook URLをコピー
+→ 毎日自動で応援メッセージが届きます！
 
-#### LINE Notify
-1. [LINE Notify](https://notify-bot.line.me/) にアクセス
-2. トークンを発行
-3. トークンをコピー
+### 🛠️ セルフホスティング
 
-#### Discord
-1. サーバー設定 → 連携サービス → Webhook
-2. Webhookを作成
-3. Webhook URLをコピー
-
-#### Microsoft Teams
-1. チャネル → コネクタ → Incoming Webhook
-2. Webhookを作成
-3. Webhook URLをコピー
-
-### 3. AWS環境構築
-```bash
-cd terraform
-cp terraform.tfvars.example terraform.tfvars
-# terraform.tfvarsにGemini APIキーを設定
-terraform init
-terraform apply
-```
-
-### 4. Lambda関数デプロイ
-```bash
-cd lambda
-npm install
-build.bat  # Windows
-# または ./build.sh  # Linux/Mac
-
-# AWS CLIでデプロイ
-aws lambda update-function-code --function-name countdown-bot --zip-file fileb://countdown-bot.zip
-```
-
-### 5. 環境変数設定
-```bash
-aws lambda update-function-configuration --function-name countdown-bot \
-  --environment "Variables={DYNAMODB_TABLE=exam-countdown,GEMINI_API_KEY=YOUR_API_KEY,GEMINI_MODEL=gemini-2.5-flash}"
-```
-
-### 6. 試験データ登録
-```bash
-cd src
-npm install
-node setup-data.js
-```
+自分のAWS環境で構築したい場合は [SELF_HOSTING.md](SELF_HOSTING.md) を参照してください。
 
 ## ディレクトリ構造
 ```

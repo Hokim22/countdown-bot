@@ -58,7 +58,8 @@ async function generateMessage(exam, daysLeft) {
         '温かい家族'
     ];
     
-    const selectedCharacter = characters[Math.floor(Math.random() * characters.length)];
+    // ユーザー指定のキャラクターがあればそれを使用、なければランダム
+    const selectedCharacter = exam.character || characters[Math.floor(Math.random() * characters.length)];
     
     const characterMessages = {
         '天真爛漫な友人': [
