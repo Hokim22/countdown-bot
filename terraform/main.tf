@@ -73,25 +73,6 @@ resource "aws_iam_role_policy" "dynamodb_policy" {
   })
 }
 
-# Bedrockアクセスポリシー
-resource "aws_iam_role_policy" "bedrock_policy" {
-  name = "countdown-bot-bedrock-policy"
-  role = aws_iam_role.lambda_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "bedrock:InvokeModel"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
 # Lambda関数
 resource "aws_lambda_function" "countdown_bot" {
   filename         = "../lambda/countdown-bot.zip"
@@ -104,6 +85,8 @@ resource "aws_lambda_function" "countdown_bot" {
   environment {
     variables = {
       DYNAMODB_TABLE = aws_dynamodb_table.exam_countdown.name
+      GEMINI_API_KEY = var.gemini_api_key
+      GEMINI_MODEL   = "gemini-2.5-flash"
     }
   }
 
@@ -140,4 +123,11 @@ output "dynamodb_table_name" {
 
 output "lambda_function_name" {
   value = aws_lambda_function.countdown_bot.function_name
+}
+
+# Gemini API Key変数
+variable "gemini_api_key" {
+  description = "Google Gemini API Key"
+  type        = string
+  sensitive   = true
 }

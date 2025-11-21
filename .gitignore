@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+package-lock.json
+
+# Lambda build
+lambda/countdown-bot.zip
+lambda/node_modules/
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
+
+# AWS response
+response.json
+
+# Environment variables
+.env
+*.pem
+*.key
