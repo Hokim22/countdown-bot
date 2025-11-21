@@ -1,14 +1,14 @@
 const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
-const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-bedrock-runtime');
 const { unmarshall } = require('@aws-sdk/util-dynamodb');
 const axios = require('axios');
 
 const dynamoClient = new DynamoDBClient({ region: 'ap-northeast-1' });
-const bedrockClient = new BedrockRuntimeClient({ region: 'ap-northeast-1' });
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 exports.handler = async (event) => {
     try {
-        // DynamoDBから試験データを取得
         const scanCommand = new ScanCommand({
             TableName: process.env.DYNAMODB_TABLE
         });
@@ -35,7 +35,6 @@ async function processExam(exam) {
     
     let message;
     if (diffDays > 0) {
-        // 生成AIでメッセージ作成
         message = await generateMessage(exam, diffDays);
     } else if (diffDays === 0) {
         message = `🎯 **${exam.examName}** 本日が試験日です！頑張って！`;
@@ -43,14 +42,11 @@ async function processExam(exam) {
         message = `✅ **${exam.examName}** お疲れ様でした！`;
     }
     
-    // Slackに投稿
-    if (exam.slackWebhookUrl) {
-        await sendToSlack(exam.slackWebhookUrl, message);
-    }
+    // マルチ通知対応
+    await sendNotification(exam, message);
 }
 
 async function generateMessage(exam, daysLeft) {
-    // キャラクターリストからランダム選択
     const characters = [
         '天真爛漫な友人',
         '毒舌系フリーター',
@@ -64,7 +60,6 @@ async function generateMessage(exam, daysLeft) {
     
     const selectedCharacter = characters[Math.floor(Math.random() * characters.length)];
     
-    // キャラクター別メッセージ
     const characterMessages = {
         '天真爛漫な友人': [
             `えー！あと${daysLeft}日じゃん！めっちゃ楽しみだね〜🎉 スライド作りはカラフルにしよう！絵文字やイラストをたくさん使って、みんなが笑顔になるような発表にしようね！一緒に頑張ろう〜✨`,
@@ -80,7 +75,7 @@ async function generateMessage(exam, daysLeft) {
         ],
         '推しのアイドル': [
             `みんな〜！あと${daysLeft}日で発表だね！キラキラ✨ ファンのみんなに素敵な姿を見せてね！スライドはカラフルに、笑顔で元気よく発表して！みんなが応援してるから、自信を持って頑張ってね〜🎆 ファイトー！`,
-            `おつかれさま〜！あと${daysLeft}日でステージに立つのね！ドキドキする〜💖 ステージでは笑顔が一番大切！緑張したら深呼吸して、みんなのことを思い出してね。きっと素敵なパフォーマンスになるよ！私も応援してるからね〜✨`
+            `おつかれさま〜！あと${daysLeft}日でステージに立つのね！ドキドキする〜💖 ステージでは笑顔が一番大切！緊張したら深呼吸して、みんなのことを思い出してね。きっと素敵なパフォーマンスになるよ！私も応援してるからね〜✨`
         ],
         '未来の自分': [
             `おつかれ。あと${daysLeft}日で発表だね。未来の君から伝えるよ。この経験が君を大きく成長させるんだ。失敗を恐れず、自分の言葉で伝えることを大切にして。今の努力が将来の自信につながるから。頑張れ！🌟`,
@@ -103,55 +98,84 @@ async function generateMessage(exam, daysLeft) {
     const messages = characterMessages[selectedCharacter];
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     
-    try {
-        // Bedrockを試す（失敗したらローカルメッセージ使用）
-        // キャラクター別の詳細プロンプト
-        const characterPrompts = {
-            '天真爛漫な友人': `あなたは天真爛漫で明るい友人です。いつもポジティブで、「〜だね！」「〜だよ！」という口調で話します。絵文字をたくさん使って、楽しさを伝えます。${exam.examName}まであと${daysLeft}日です。実用的なアドバイスを明るく楽しく伝えてください。150文字程度で。`,
-            '毒舌系フリーター': `あなたは毒舌系のフリーターです。「はぁ？」「〜だからね〜」「知らんけど」などの口調で、毒舌だけど最終的には応援してくれます。現実的でシニカルな視点で物事を言います。${exam.examName}まであと${daysLeft}日です。毒舌だけど実用的なアドバイスをしてください。150文字程度で。`,
-            '近所の優しい甘いお姉さん': `あなたは近所の優しいお姉さんです。「あら〜」「〜ね♡」「お疲れさま」などの甘い口調で、いつも母性的に心配してくれます。お菓子やお茶の話もします。${exam.examName}まであと${daysLeft}日です。優しく母性的にアドバイスしてください。150文字程度で。`,
-            '推しのアイドル': `あなたはアイドルです。「みんな〜！」「ファイトー！」「キラキラ✨」などの可愛い口調で、ファンへの愛を込めて話します。ステージやパフォーマンスの話もします。${exam.examName}まであと${daysLeft}日です。アイドルらしくキラキラした応援メッセージをください。150文字程度で。`,
-            '未来の自分': `あなたは未来の自分です。落ち着いていて、「おつかれ」「君」「だね」などの口調で話します。経験者としての知恵と、将来への希望を伝えます。${exam.examName}まであと${daysLeft}日です。未来の視点からの深いアドバイスをください。150文字程度で。`,
-            '競い合うライバル': `あなたはライバルです。「ふん」「まさか」「負けないからね」などの挑戦的な口調で、競争心を燃やします。相手を認めつつも、自分も負けていられないという気持ちです。${exam.examName}まであと${daysLeft}日です。ライバルらしく挑戦的なアドバイスをください。150文字程度で。`,
-            '守護霊': `あなたは守護霊です。「ふむ」「汝よ」「ぞ」などの古風な口調で、神秘的で精神的な存在です。長い間見守ってきた経験から、深い知恵を授けます。${exam.examName}まであと${daysLeft}日です。守護霊らしく精神的なアドバイスをください。150文字程度で。`,
-            '温かい家族': `あなたは温かい家族です。「お疲れさま」「あなた」「〜のよ」などの家族らしい温かい口調で、無条件の愛情を持っています。体調や生活を心配し、いつでも味方です。${exam.examName}まであと${daysLeft}日です。家族らしい温かいアドバイスをください。150文字程度で。`
-        };
-        
-        const prompt = characterPrompts[selectedCharacter] || `あなたは${selectedCharacter}です。${exam.examName}まであと${daysLeft}日です。実用的なアドバイス付きで応援する150文字程度のメッセージを作成してください。`;
+    const characterPrompts = {
+        '天真爛漫な友人': `あなたは天真爛漫で明るい友人です。いつもポジティブで、「〜だね！」「〜だよ！」という口調で話します。絵文字をたくさん使って、楽しさを伝えます。${exam.examName}まであと${daysLeft}日です。実用的なアドバイスを明るく楽しく伝えてください。150文字程度で。`,
+        '毒舌系フリーター': `あなたは毒舌系のフリーターです。「はぁ？」「〜だからね〜」「知らんけど」などの口調で、毒舌だけど最終的には応援してくれます。現実的でシニカルな視点で物事を言います。${exam.examName}まであと${daysLeft}日です。毒舌だけど実用的なアドバイスをしてください。150文字程度で。`,
+        '近所の優しい甘いお姉さん': `あなたは近所の優しいお姉さんです。「あら〜」「〜ね♡」「お疲れさま」などの甘い口調で、いつも母性的に心配してくれます。お菓子やお茶の話もします。${exam.examName}まであと${daysLeft}日です。優しく母性的にアドバイスしてください。150文字程度で。`,
+        '推しのアイドル': `あなたはアイドルです。「みんな〜！」「ファイトー！」「キラキラ✨」などの可愛い口調で、ファンへの愛を込めて話します。ステージやパフォーマンスの話もします。${exam.examName}まであと${daysLeft}日です。アイドルらしくキラキラした応援メッセージをください。150文字程度で。`,
+        '未来の自分': `あなたは未来の自分です。落ち着いていて、「おつかれ」「君」「だね」などの口調で話します。経験者としての知恵と、将来への希望を伝えます。${exam.examName}まであと${daysLeft}日です。未来の視点からの深いアドバイスをください。150文字程度で。`,
+        '競い合うライバル': `あなたはライバルです。「ふん」「まさか」「負けないからね」などの挑戦的な口調で、競争心を燃やします。相手を認めつつも、自分も負けていられないという気持ちです。${exam.examName}まであと${daysLeft}日です。ライバルらしく挑戦的なアドバイスをください。150文字程度で。`,
+        '守護霊': `あなたは守護霊です。「ふむ」「汝よ」「ぞ」などの古風な口調で、神秘的で精神的な存在です。長い間見守ってきた経験から、深い知恵を授けます。${exam.examName}まであと${daysLeft}日です。守護霊らしく精神的なアドバイスをください。150文字程度で。`,
+        '温かい家族': `あなたは温かい家族です。「お疲れさま」「あなた」「〜のよ」などの家族らしい温かい口調で、無条件の愛情を持っています。体調や生活を心配し、いつでも味方です。${exam.examName}まであと${daysLeft}日です。家族らしい温かいアドバイスをください。150文字程度で。`
+    };
+    
+    const prompt = characterPrompts[selectedCharacter] || `あなたは${selectedCharacter}です。${exam.examName}まであと${daysLeft}日です。実用的なアドバイス付きで応援する150文字程度のメッセージを作成してください。`;
 
-        const command = new InvokeModelCommand({
-            modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
-            body: JSON.stringify({
-                anthropic_version: 'bedrock-2023-05-31',
-                max_tokens: 200,
-                messages: [{
-                    role: 'user',
-                    content: prompt
-                }]
-            }),
-            contentType: 'application/json'
+    try {
+        if (!GEMINI_API_KEY) {
+            throw new Error('GEMINI_API_KEY is not set');
+        }
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
+        const response = await axios.post(url, {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 200, temperature: 0.8 }
+        }, {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 10000
         });
-        
-        const response = await bedrockClient.send(command);
-        const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-        const aiMessage = responseBody.content[0].text;
-        
+
+        const aiMessage = response.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || randomMessage;
+
         return `📚 **${exam.examName}** まであと **${daysLeft}日**\n🎭 **今日のキャラ**: ${selectedCharacter}\n${aiMessage}`;
     } catch (error) {
-        console.error('Bedrock error:', error);
-        // ローカルのキャラクターメッセージを使用
+        console.error('Gemini error:', error?.response?.data || error.message);
         return `📚 **${exam.examName}** まであと **${daysLeft}日**\n🎭 **今日のキャラ**: ${selectedCharacter}\n${randomMessage}`;
     }
 }
 
-async function sendToSlack(webhookUrl, message) {
+async function sendNotification(exam, message) {
+    const type = exam.notificationType || 'slack';
+    const url = exam.notificationUrl || exam.slackWebhookUrl;
+    
+    if (!url) {
+        console.log('No notification URL configured');
+        return;
+    }
+
     try {
-        await axios.post(webhookUrl, {
-            text: message,
-            username: 'カウントダウンBot',
-            icon_emoji: ':books:'
-        });
+        switch (type) {
+            case 'slack':
+            case 'discord':
+                await axios.post(url, {
+                    text: message,
+                    username: 'カウントダウンBot',
+                    icon_emoji: ':books:'
+                });
+                break;
+
+            case 'line':
+                await axios.post('https://notify-api.line.me/api/notify', 
+                    `message=${encodeURIComponent(message)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${url}`,
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+                break;
+
+            case 'teams':
+                await axios.post(url, {
+                    text: message
+                });
+                break;
+
+            default:
+                console.error('Unknown notification type:', type);
+        }
+        console.log(`Notification sent via ${type}`);
     } catch (error) {
-        console.error('Slack error:', error);
+        console.error(`${type} notification error:`, error.message);
     }
 }

@@ -3,7 +3,21 @@
     "examId": "exam001",
     "examName": "社内勉強会での発表",
     "targetDate": "2025-10-14",
-    "character": "毒舌系のフリーター",
-    "slackWebhookUrl": "https://hooks.slack.com/services/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"
+    "notificationType": "slack",
+    "notificationUrl": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+  },
+  {
+    "examId": "exam002",
+    "examName": "AWS認定試験",
+    "targetDate": "2025-12-01",
+    "notificationType": "line",
+    "notificationUrl": "YOUR_LINE_NOTIFY_TOKEN"
+  },
+  {
+    "examId": "exam003",
+    "examName": "プロジェクト発表",
+    "targetDate": "2025-11-15",
+    "notificationType": "discord",
+    "notificationUrl": "https://discord.com/api/webhooks/YOUR/WEBHOOK"
   }
 ]

@@ -6,6 +6,7 @@
 - 🎭 8種類のキャラクターがランダムで応援
 - 🤖 Google Gemini 2.5 Flash で生成AIメッセージ
 - 💰 **完全無料**（AWS無料枠 + Gemini無料枠）
+- 📱 **マルチ通知対応**（Slack / LINE / Discord / Teams）
 
 ## アーキテクチャ
 - **Lambda**: カウントダウン計算・メッセージ生成
@@ -20,9 +21,26 @@
 1. [Google AI Studio](https://aistudio.google.com/app/apikey) でAPIキーを取得
 2. 無料枠: 15 RPM、1,500 RPD
 
-### 2. Slack Webhook URL取得
+### 2. 通知先の設定
+
+#### Slack
 1. Slack Appを作成
 2. Incoming Webhookを有効化
+3. Webhook URLをコピー
+
+#### LINE Notify
+1. [LINE Notify](https://notify-bot.line.me/) にアクセス
+2. トークンを発行
+3. トークンをコピー
+
+#### Discord
+1. サーバー設定 → 連携サービス → Webhook
+2. Webhookを作成
+3. Webhook URLをコピー
+
+#### Microsoft Teams
+1. チャネル → コネクタ → Incoming Webhook
+2. Webhookを作成
 3. Webhook URLをコピー
 
 ### 3. AWS環境構築
