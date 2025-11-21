@@ -12,9 +12,21 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json'
     };
 
+    const method = event.requestContext?.http?.method || event.httpMethod;
+
     // OPTIONSリクエスト対応
-    if (event.requestContext?.http?.method === 'OPTIONS' || event.httpMethod === 'OPTIONS') {
+    if (method === 'OPTIONS') {
         return { statusCode: 200, headers, body: '' };
+    }
+
+    // GETリクエスト（favicon等）を無視
+    if (method === 'GET') {
+        return { statusCode: 404, headers, body: JSON.stringify({ error: 'Not Found' }) };
+    }
+
+    // POST以外は拒否
+    if (method !== 'POST') {
+        return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
     }
 
     try {
