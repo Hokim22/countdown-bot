@@ -134,7 +134,7 @@ ${exam.examName}まであと${daysLeft}日です。そのキャラクターら�
 
         const response = await axios.post(url, {
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 400, temperature: 0.8 }
+            generationConfig: { maxOutputTokens: 400, temperature: 1.2 }
         }, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 10000
