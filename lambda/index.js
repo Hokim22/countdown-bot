@@ -1,5 +1,5 @@
 const { DynamoDBClient, ScanCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
-const { unmarshall } = require('@aws-sdk/util-dynamodb');
+const { unmarshall, marshall } = require('@aws-sdk/util-dynamodb');
 const axios = require('axios');
 
 const dynamoClient = new DynamoDBClient({ region: 'ap-northeast-1' });
@@ -13,7 +13,7 @@ exports.handler = async (event) => {
         if (event.examId) {
             const result = await dynamoClient.send(new GetItemCommand({
                 TableName: process.env.DYNAMODB_TABLE,
-                Key: require('@aws-sdk/util-dynamodb').marshall({ examId: event.examId })
+                Key: marshall({ examId: event.examId })
             }));
             
             if (result.Item) {
