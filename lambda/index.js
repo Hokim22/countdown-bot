@@ -58,8 +58,20 @@ async function generateMessage(exam, daysLeft) {
         '温かい家族'
     ];
     
-    // ユーザー指定のキャラクターがあればそれを使用、なければランダム
-    const selectedCharacter = exam.character || characters[Math.floor(Math.random() * characters.length)];
+    // ユーザー指定のキャラクターからランダム選択
+    let selectedCharacter;
+    let customPrompt = '';
+    
+    if (exam.characters && Array.isArray(exam.characters) && exam.characters.length > 0) {
+        const randomChar = exam.characters[Math.floor(Math.random() * exam.characters.length)];
+        selectedCharacter = randomChar.name;
+        customPrompt = randomChar.prompt || '';
+    } else if (exam.character) {
+        // 後方互換性
+        selectedCharacter = exam.character;
+    } else {
+        selectedCharacter = characters[Math.floor(Math.random() * characters.length)];
+    }
     
     const characterMessages = {
         '天真爛漫な友人': [
@@ -110,7 +122,18 @@ async function generateMessage(exam, daysLeft) {
         '温かい家族': `あなたは温かい家族です。「お疲れさま」「あなた」「〜のよ」などの家族らしい温かい口調で、無条件の愛情を持っています。体調や生活を心配し、いつでも味方です。${exam.examName}まであと${daysLeft}日です。家族らしい温かいアドバイスをください。150文字程度で。`
     };
     
-    const prompt = characterPrompts[selectedCharacter] || `あなたは${selectedCharacter}です。${exam.examName}まであと${daysLeft}日です。実用的なアドバイス付きで応援する150文字程度のメッセージを作成してください。`;
+    let prompt;
+    if (customPrompt) {
+        // カスタムプロンプトがある場合
+        prompt = `あなたは${selectedCharacter}です。${customPrompt}
+${exam.examName}まであと${daysLeft}日です。そのキャラクターらしく、実用的なアドバイス付きで応援する150文字程度のメッセージを作成してください。`;
+    } else if (characterPrompts[selectedCharacter]) {
+        // プリセットキャラクター
+        prompt = characterPrompts[selectedCharacter];
+    } else {
+        // キャラクター名のみ指定（AIが自動で性格を考える）
+        prompt = `あなたは${selectedCharacter}です。${exam.examName}まであと${daysLeft}日です。${selectedCharacter}らしい性格や口調で、実用的なアドバイス付きで応援する150文字程度のメッセージを作成してください。`;
+    }
 
     try {
         if (!GEMINI_API_KEY) {

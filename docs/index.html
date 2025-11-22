@@ -48,40 +48,71 @@
             </div>
 
             <div class="form-group">
-                <label>キャラクター選択 *</label>
-                <div class="character-grid">
-                    <label class="character-option">
-                        <input type="radio" name="character" value="天真爛漫な友人" required>
+                <label>キャラクター設定 *</label>
+                <small style="color: #666; font-size: 12px; display: block; margin-bottom: 10px;">
+                    プリセットまたはカスタムキャラクターを追加できます。複数選択するとランダムで登場します。
+                </small>
+                
+                <div class="character-grid" id="characterGrid">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="天真爛漫な友人">
                         <div>😊 天真爛漫な友人</div>
                     </label>
-                    <label class="character-option">
-                        <input type="radio" name="character" value="毒舌系フリーター">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="毒舌系フリーター">
                         <div>😏 毒舌系フリーター</div>
                     </label>
-                    <label class="character-option">
-                        <input type="radio" name="character" value="近所の優しい甘いお姉さん">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="近所の優しい甘いお姉さん">
                         <div>🌸 優しいお姉さん</div>
                     </label>
-                    <label class="character-option">
-                        <input type="radio" name="character" value="推しのアイドル">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="推しのアイドル">
                         <div>✨ 推しのアイドル</div>
                     </label>
-                    <label class="character-option">
-                        <input type="radio" name="character" value="未来の自分">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="未来の自分">
                         <div>🌟 未来の自分</div>
                     </label>
-                    <label class="character-option">
-                        <input type="radio" name="character" value="競い合うライバル">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="競い合うライバル">
                         <div>😤 ライバル</div>
                     </label>
-                    <label class="character-option">
-                        <input type="radio" name="character" value="守護霊">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="守護霊">
                         <div>🙏 守護霊</div>
                     </label>
-                    <label class="character-option">
-                        <input type="radio" name="character" value="温かい家族">
+                    <label class="character-option preset">
+                        <input type="checkbox" name="character" value="温かい家族">
                         <div>🌿 温かい家族</div>
                     </label>
+                </div>
+                
+                <button type="button" id="addCharacterBtn" style="width: 100%; margin-top: 15px; background: #f5f7ff; color: #667eea; border: 2px dashed #667eea;">
+                    + カスタムキャラクターを追加
+                </button>
+            </div>
+            
+            <div id="customCharacterModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%;">
+                    <h3 style="margin-bottom: 20px; color: #667eea;">カスタムキャラクター追加</h3>
+                    
+                    <div class="form-group">
+                        <label>キャラクター名 *</label>
+                        <input type="text" id="customCharName" placeholder="例: 優しい先生">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>性格・口調（オプション）</label>
+                        <textarea id="customCharPrompt" rows="4" placeholder="例: 丁寧な言葉遣いで、いつも優しく励ましてくれる。「〜ですね」「〜ましょう」という口調。
+
+空欄の場合、AIがキャラクター名から自動で性格を考えます。" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" id="cancelCharBtn" style="flex: 1; background: #e0e0e0; color: #666;">キャンセル</button>
+                        <button type="button" id="saveCharBtn" style="flex: 1;">追加</button>
+                    </div>
                 </div>
             </div>
 
@@ -125,13 +156,61 @@
         const successMsg = document.getElementById('successMsg');
         const errorMsg = document.getElementById('errorMsg');
 
+        const customCharacters = [];
+
         // キャラクター選択のUI
         document.querySelectorAll('.character-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.character-option').forEach(o => o.classList.remove('selected'));
-                this.classList.add('selected');
-                this.querySelector('input[type="radio"]').checked = true;
+            option.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'INPUT') {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                }
+                this.classList.toggle('selected', this.querySelector('input[type="checkbox"]').checked);
             });
+        });
+
+        // カスタムキャラクター追加ボタン
+        document.getElementById('addCharacterBtn').addEventListener('click', () => {
+            document.getElementById('customCharacterModal').style.display = 'flex';
+            document.getElementById('customCharName').value = '';
+            document.getElementById('customCharPrompt').value = '';
+        });
+
+        // キャンセル
+        document.getElementById('cancelCharBtn').addEventListener('click', () => {
+            document.getElementById('customCharacterModal').style.display = 'none';
+        });
+
+        // カスタムキャラクター保存
+        document.getElementById('saveCharBtn').addEventListener('click', () => {
+            const name = document.getElementById('customCharName').value.trim();
+            if (!name) {
+                alert('キャラクター名を入力してください');
+                return;
+            }
+
+            const prompt = document.getElementById('customCharPrompt').value.trim();
+            customCharacters.push({ name, prompt });
+
+            // グリッドに追加
+            const grid = document.getElementById('characterGrid');
+            const label = document.createElement('label');
+            label.className = 'character-option custom';
+            label.innerHTML = `
+                <input type="checkbox" name="character" value="custom-${customCharacters.length - 1}" checked>
+                <div>🎭 ${name}</div>
+            `;
+            label.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'INPUT') {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                }
+                this.classList.toggle('selected', this.querySelector('input[type="checkbox"]').checked);
+            });
+            label.classList.add('selected');
+            grid.appendChild(label);
+
+            document.getElementById('customCharacterModal').style.display = 'none';
         });
 
         // 最小日付を今日に設定
@@ -145,10 +224,29 @@
             successMsg.style.display = 'none';
             errorMsg.style.display = 'none';
 
+            // 選択されたキャラクターを収集
+            const selectedChars = [];
+            document.querySelectorAll('input[name="character"]:checked').forEach(input => {
+                const value = input.value;
+                if (value.startsWith('custom-')) {
+                    const index = parseInt(value.replace('custom-', ''));
+                    selectedChars.push(customCharacters[index]);
+                } else {
+                    selectedChars.push({ name: value, prompt: '' });
+                }
+            });
+
+            if (selectedChars.length === 0) {
+                alert('キャラクターを少なくとも1つ選択してください');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '登録する';
+                return;
+            }
+
             const data = {
                 examName: document.getElementById('examName').value,
                 targetDate: document.getElementById('targetDate').value,
-                character: document.querySelector('input[name="character"]:checked').value,
+                characters: selectedChars,
                 notificationType: document.getElementById('notificationType').value,
                 notificationUrl: document.getElementById('notificationUrl').value,
                 notificationTime: document.getElementById('notificationTime').value

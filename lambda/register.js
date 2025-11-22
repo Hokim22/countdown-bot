@@ -44,11 +44,19 @@ exports.handler = async (event) => {
         }
         
         // バリデーション
-        if (!body.examName || !body.targetDate || !body.character || !body.notificationType || !body.notificationUrl) {
+        if (!body.examName || !body.targetDate || !body.characters || !body.notificationType || !body.notificationUrl) {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({ error: 'Missing required fields' })
+            };
+        }
+        
+        if (!Array.isArray(body.characters) || body.characters.length === 0) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'At least one character is required' })
             };
         }
         
@@ -71,7 +79,7 @@ exports.handler = async (event) => {
             examId,
             examName: body.examName,
             targetDate: body.targetDate,
-            character: body.character,
+            characters: body.characters,
             notificationType: body.notificationType,
             notificationUrl: body.notificationUrl,
             notificationTime,
