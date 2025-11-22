@@ -83,46 +83,77 @@ async function generateMessage(exam, daysLeft) {
         selectedCharacter = characters[Math.floor(Math.random() * characters.length)];
     }
     
-    const characterMessages = {
-        '明るい友人': [
-            `えー！あと${daysLeft}日じゃん！めっちゃ楽しみだね〜🎉 一緒に頑張ろう〜✨`,
-            `わあ〜！あと${daysLeft}日だね！ドキドキする〜😆 でも大丈夫！私も応援してるからね〜💕`
-        ],
-        '厳しいコーチ': [
-            `まだまだだな。あと${daysLeft}日しかないぞ？💦 今日中に計画を立てろ！`,
-            `${daysLeft}日後に後悔するなよ😏 毎日コツコツ積み重ねることが大事だ。`
-        ],
-        '優しい先輩': [
-            `あと${daysLeft}日なのね〜 がんばってるのね！応援してるわよ〜🌸`,
-            `お疲れさま〜。あと${daysLeft}日ね。無理しちゃダメよ？しっかり休憩も取ってね〜🌿`
-        ],
-        '未来の自分': [
-            `おつかれ。あと${daysLeft}日だね。この経験が君を大きく成長させるんだ。頑張れ！🌟`,
-            `やあ。あと${daysLeft}日か。今の努力が将来の自信につながるよ。自分を信じて進んでいこう。`
-        ]
-    };
-    
-    const messages = characterMessages[selectedCharacter];
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    
     const characterPrompts = {
-        '明るい友人': `あなたは明るくポジティブな友人です。「〜だね！」「〜だよ！」という口調で話します。絵文字を使って楽しさを伝えます。${exam.examName}まであと${daysLeft}日です。実用的なアドバイスを明るく楽しく伝えてください。300文字程度で。`,
-        '厳しいコーチ': `あなたは厳しいコーチです。「まだまだだな」「もっとできる」という厳しい口調ですが、最終的には応援してくれます。現実的で実践的なアドバイスをします。${exam.examName}まであと${daysLeft}日です。厳しくも実用的なアドバイスをください。300文字程度で。`,
-        '優しい先輩': `あなたは優しい先輩です。「〜ですね」「〜ましょう」という丁寧な口調で、いつも母性的に心配してくれます。体調や休息のことも気遣ってくれます。${exam.examName}まであと${daysLeft}日です。優しく母性的にアドバイスしてください。300文字程度で。`,
-        '未来の自分': `あなたは未来の自分です。落ち着いていて、「おつかれ」「君」「だね」などの口調で話します。経験者としての知恵と、将来への希望を伝えます。${exam.examName}まであと${daysLeft}日です。未来の視点からの深いアドバイスをください。300文字程度で。`
+        '明るい友人': `あなたは明るくポジティブな友人です。「〜だね！」「〜だよ！」という口調で話します。絵文字を多めに使って楽しさを伝えます。
+
+目標: ${exam.examName}
+残り日数: ${daysLeft}日
+
+以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+1. 残り日数に対する明るいコメント
+2. 「${exam.examName}」という目標に特化した具体的なアドバイス（例：ダイエットなら食事や運動、TOEICなら勉強法など）
+3. 今日やるべき具体的な行動提案
+4. 励ましの言葉
+
+毎回異なる表現や視点を使って、新鮮なメッセージにしてください。`,
+        '厳しいコーチ': `あなたは厳しいコーチです。「まだまだだな」「もっとできる」という厳しい口調ですが、最終的には応援してくれます。
+
+目標: ${exam.examName}
+残り日数: ${daysLeft}日
+
+以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+1. 厳しい現状認識
+2. 「${exam.examName}」という目標に特化した実践的で具体的なアドバイス（例：ダイエットなら食事管理や運動メニュー、TOEICなら学習計画など）
+3. 今日必ずやるべき具体的なタスク
+4. 最後に熱い応援メッセージ
+
+毎回異なる角度から厳しくも愛のあるメッセージを送ってください。`,
+        '優しい先輩': `あなたは優しい先輩です。「〜ですね」「〜ましょう」という丁寧な口調で、いつも母性的に心配してくれます。
+
+目標: ${exam.examName}
+残り日数: ${daysLeft}日
+
+以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+1. 優しい労いの言葉
+2. 「${exam.examName}」という目標に特化した無理のない具体的なアドバイス（例：ダイエットなら健康的な方法、TOEICなら効率的な学習法など）
+3. 体調管理や休息についての気遣い
+4. 温かい応援メッセージ
+
+毎回異なる優しい表現で、心に寄り添うメッセージを送ってください。`,
+        '未来の自分': `あなたは未来の自分です。落ち着いていて、「おつかれ」「君」「だね」などの口調で話します。経験者としての知恵を持っています。
+
+目標: ${exam.examName}
+残り日数: ${daysLeft}日
+
+以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+1. 未来の視点からの落ち着いたコメント
+2. 「${exam.examName}」という目標に特化した、経験に基づく深い具体的なアドバイス
+3. この経験が将来どう役立つかの示唆
+4. 自分を信じることの大切さ
+
+毎回異なる深い洞察を含む、示唆に富んだメッセージを送ってください。`
     };
     
     let prompt;
     if (customPrompt) {
         // カスタムプロンプトがある場合
         prompt = `あなたは${selectedCharacter}です。${customPrompt}
-${exam.examName}まであと${daysLeft}日です。そのキャラクターらしく、実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。`;
+
+目標: ${exam.examName}
+残り日数: ${daysLeft}日
+
+そのキャラクターらしく、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する500文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
     } else if (characterPrompts[selectedCharacter]) {
         // プリセットキャラクター
         prompt = characterPrompts[selectedCharacter];
     } else {
         // キャラクター名のみ指定（AIが自動で性格を考える）
-        prompt = `あなたは${selectedCharacter}です。${exam.examName}まであと${daysLeft}日です。${selectedCharacter}らしい性格や口調で、実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。`;
+        prompt = `あなたは${selectedCharacter}です。
+
+目標: ${exam.examName}
+残り日数: ${daysLeft}日
+
+${selectedCharacter}らしい性格や口調で、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する500文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
     }
 
     try {
@@ -134,18 +165,22 @@ ${exam.examName}まであと${daysLeft}日です。そのキャラクターら�
 
         const response = await axios.post(url, {
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 400, temperature: 1.2 }
+            generationConfig: { maxOutputTokens: 800, temperature: 1.3 }
         }, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 10000
         });
 
-        const aiMessage = response.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || randomMessage;
+        const aiMessage = response.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        
+        if (!aiMessage) {
+            throw new Error('No AI message generated');
+        }
 
-        return `📚 **${exam.examName}** まであと **${daysLeft}日**\n🎭 **今日のキャラ**: ${selectedCharacter}\n${aiMessage}`;
+        return `📚 **${exam.examName}** まであと **${daysLeft}日**\n🎭 **今日のキャラ**: ${selectedCharacter}\n\n${aiMessage}`;
     } catch (error) {
         console.error('Gemini error:', error?.response?.data || error.message);
-        return `📚 **${exam.examName}** まであと **${daysLeft}日**\n🎭 **今日のキャラ**: ${selectedCharacter}\n${randomMessage}`;
+        throw error; // エラーを上に投げて、通知自体を送らない
     }
 }
 
