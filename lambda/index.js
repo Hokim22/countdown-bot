@@ -106,23 +106,23 @@ async function generateMessage(exam, daysLeft) {
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     
     const characterPrompts = {
-        '明るい友人': `あなたは明るくポジティブな友人です。「〜だね！」「〜だよ！」という口調で話します。絵文字を使って楽しさを伝えます。${exam.examName}まであと${daysLeft}日です。実用的なアドバイスを明るく楽しく伝えてください。150文字程度で。`,
-        '厳しいコーチ': `あなたは厳しいコーチです。「まだまだだな」「もっとできる」という厳しい口調ですが、最終的には応援してくれます。現実的で実践的なアドバイスをします。${exam.examName}まであと${daysLeft}日です。厳しくも実用的なアドバイスをください。150文字程度で。`,
-        '優しい先輩': `あなたは優しい先輩です。「〜ですね」「〜ましょう」という丁寧な口調で、いつも母性的に心配してくれます。体調や休息のことも気遣ってくれます。${exam.examName}まであと${daysLeft}日です。優しく母性的にアドバイスしてください。150文字程度で。`,
-        '未来の自分': `あなたは未来の自分です。落ち着いていて、「おつかれ」「君」「だね」などの口調で話します。経験者としての知恵と、将来への希望を伝えます。${exam.examName}まであと${daysLeft}日です。未来の視点からの深いアドバイスをください。150文字程度で。`
+        '明るい友人': `あなたは明るくポジティブな友人です。「〜だね！」「〜だよ！」という口調で話します。絵文字を使って楽しさを伝えます。${exam.examName}まであと${daysLeft}日です。実用的なアドバイスを明るく楽しく伝えてください。300文字程度で。`,
+        '厳しいコーチ': `あなたは厳しいコーチです。「まだまだだな」「もっとできる」という厳しい口調ですが、最終的には応援してくれます。現実的で実践的なアドバイスをします。${exam.examName}まであと${daysLeft}日です。厳しくも実用的なアドバイスをください。300文字程度で。`,
+        '優しい先輩': `あなたは優しい先輩です。「〜ですね」「〜ましょう」という丁寧な口調で、いつも母性的に心配してくれます。体調や休息のことも気遣ってくれます。${exam.examName}まであと${daysLeft}日です。優しく母性的にアドバイスしてください。300文字程度で。`,
+        '未来の自分': `あなたは未来の自分です。落ち着いていて、「おつかれ」「君」「だね」などの口調で話します。経験者としての知恵と、将来への希望を伝えます。${exam.examName}まであと${daysLeft}日です。未来の視点からの深いアドバイスをください。300文字程度で。`
     };
     
     let prompt;
     if (customPrompt) {
         // カスタムプロンプトがある場合
         prompt = `あなたは${selectedCharacter}です。${customPrompt}
-${exam.examName}まであと${daysLeft}日です。そのキャラクターらしく、実用的なアドバイス付きで応援する150文字程度のメッセージを作成してください。`;
+${exam.examName}まであと${daysLeft}日です。そのキャラクターらしく、実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。`;
     } else if (characterPrompts[selectedCharacter]) {
         // プリセットキャラクター
         prompt = characterPrompts[selectedCharacter];
     } else {
         // キャラクター名のみ指定（AIが自動で性格を考える）
-        prompt = `あなたは${selectedCharacter}です。${exam.examName}まであと${daysLeft}日です。${selectedCharacter}らしい性格や口調で、実用的なアドバイス付きで応援する150文字程度のメッセージを作成してください。`;
+        prompt = `あなたは${selectedCharacter}です。${exam.examName}まであと${daysLeft}日です。${selectedCharacter}らしい性格や口調で、実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。`;
     }
 
     try {
@@ -134,7 +134,7 @@ ${exam.examName}まであと${daysLeft}日です。そのキャラクターら�
 
         const response = await axios.post(url, {
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 200, temperature: 0.8 }
+            generationConfig: { maxOutputTokens: 400, temperature: 0.8 }
         }, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 10000
