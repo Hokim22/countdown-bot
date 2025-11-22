@@ -59,6 +59,14 @@ exports.handler = async (event) => {
                 body: JSON.stringify(unmarshall(result.Item))
             };
         } else if (method === 'DELETE') {
+            // 削除時も管理者キーをチェック
+            if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+                return {
+                    statusCode: 403,
+                    body: JSON.stringify({ error: 'Forbidden' })
+                };
+            }
+            
             // EventBridgeルールを削除
             const ruleName = `countdown-${examId}`;
             try {

@@ -85,6 +85,15 @@
             margin-top: 10px;
             word-break: break-all;
         }
+        .delete-btn {
+            width: auto;
+            padding: 10px 20px;
+            background: #dc3545;
+            margin-top: 10px;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -154,12 +163,36 @@
                         </div>
                         <p><strong>登録日:</strong> ${item.createdAt || '不明'}</p>
                         <p><strong>ID:</strong> ${item.examId}</p>
+                        <button class="delete-btn" onclick="deleteItem('${item.examId}')">🗑️ 削除</button>
                     `;
                     
                     itemsEl.appendChild(div);
                 });
             } catch (error) {
                 errorEl.textContent = 'エラーが発生しました: ' + error.message;
+            }
+        }
+
+        async function deleteItem(examId) {
+            if (!confirm('本当に削除しますか？')) {
+                return;
+            }
+
+            try {
+                const adminKey = document.getElementById('adminKey').value;
+                const response = await fetch(`${MANAGE_URL}?id=${examId}&adminKey=${encodeURIComponent(adminKey)}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    alert('削除に失敗しました');
+                    return;
+                }
+
+                alert('削除しました');
+                loadData();
+            } catch (error) {
+                alert('エラーが発生しました: ' + error.message);
             }
         }
     </script>
