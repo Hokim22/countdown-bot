@@ -1,4 +1,4 @@
-const { DynamoDBClient, GetItemCommand, DeleteItemCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, GetItemCommand, DeleteItemCommand, ScanCommand } = require('@aws-sdk/client-dynamodb');
 const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
 const { EventBridgeClient, RemoveTargetsCommand, DeleteRuleCommand } = require('@aws-sdk/client-eventbridge');
 
@@ -21,6 +21,30 @@ exports.handler = async (event) => {
 
     try {
         const examId = event.queryStringParameters?.id;
+        const adminKey = event.queryStringParameters?.adminKey;
+        
+        // 管理者用：全データ取得
+        if (method === 'GET' && adminKey && !examId) {
+            if (adminKey !== process.env.ADMIN_KEY) {
+                return {
+                    statusCode: 403,
+                    headers,
+                    body: JSON.stringify({ error: 'Forbidden' })
+                };
+            }
+            
+            const result = await dynamoClient.send(new ScanCommand({
+                TableName: process.env.DYNAMODB_TABLE
+            }));
+            
+            const items = result.Items.map(item => unmarshall(item));
+            
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({ items })
+            };
+        }
         
         if (!examId) {
             return {

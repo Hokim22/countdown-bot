@@ -158,9 +158,11 @@ ${selectedCharacter}らしい性格や口調で、「${exam.examName}」とい�
 
     try {
         if (!GEMINI_API_KEY) {
+            console.error('GEMINI_API_KEY is not set in environment variables');
             throw new Error('GEMINI_API_KEY is not set');
         }
 
+        console.log(`Calling Gemini API with model: ${GEMINI_MODEL}`);
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
         const response = await axios.post(url, {
@@ -168,8 +170,10 @@ ${selectedCharacter}らしい性格や口調で、「${exam.examName}」とい�
             generationConfig: { maxOutputTokens: 500, temperature: 1.3 }
         }, {
             headers: { 'Content-Type': 'application/json' },
-            timeout: 10000
+            timeout: 20000
         });
+        
+        console.log('Gemini API response received successfully');
 
         const aiMessage = response.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
         
@@ -180,7 +184,7 @@ ${selectedCharacter}らしい性格や口調で、「${exam.examName}」とい�
         return `📚 **${exam.examName}** まであと **${daysLeft}日**\n🎭 **今日のキャラ**: ${selectedCharacter}\n\n${aiMessage}`;
     } catch (error) {
         console.error('Gemini error:', error?.response?.data || error.message);
-        throw error; // エラーを上に投げて、通知自体を送らない
+        return `⚠️ **エラー通知**\n📚 **${exam.examName}** まであと **${daysLeft}日**\n\nメッセージの生成に失敗しました。\nGemini APIの設定を確認してください。\n\nエラー: ${error.message}`;
     }
 }
 

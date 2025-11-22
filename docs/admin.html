@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者ページ - カウントダウンBot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .data-list {
+            display: none;
+        }
+        .data-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .data-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .data-item p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .url-field {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 管理者ページ</h1>
+        
+        <div class="login-form" id="loginForm">
+            <input type="password" id="adminKey" placeholder="管理者キーを入力">
+            <button onclick="loadData()">ログイン</button>
+            <p class="error" id="error"></p>
+        </div>
+
+        <div class="data-list" id="dataList">
+            <h2>登録済みデータ一覧</h2>
+            <div id="items"></div>
+        </div>
+    </div>
+
+    <script>
+        const MANAGE_URL = 'YOUR_MANAGE_LAMBDA_URL'; // ここにmanage LambdaのURLを設定
+
+        async function loadData() {
+            const adminKey = document.getElementById('adminKey').value;
+            const errorEl = document.getElementById('error');
+            
+            if (!adminKey) {
+                errorEl.textContent = '管理者キーを入力してください';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${MANAGE_URL}?adminKey=${encodeURIComponent(adminKey)}`);
+                
+                if (!response.ok) {
+                    errorEl.textContent = '認証に失敗しました';
+                    return;
+                }
+
+                const data = await response.json();
+                
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('dataList').style.display = 'block';
+                
+                const itemsEl = document.getElementById('items');
+                itemsEl.innerHTML = '';
+                
+                if (data.items.length === 0) {
+                    itemsEl.innerHTML = '<p>登録されているデータはありません</p>';
+                    return;
+                }
+                
+                data.items.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'data-item';
+                    
+                    const characters = item.characters?.map(c => c.name).join(', ') || item.character || '未設定';
+                    
+                    div.innerHTML = `
+                        <h3>${item.examName}</h3>
+                        <p><strong>目標日:</strong> ${item.targetDate}</p>
+                        <p><strong>通知時間:</strong> ${item.notificationTime || '09:00'}</p>
+                        <p><strong>キャラクター:</strong> ${characters}</p>
+                        <p><strong>通知タイプ:</strong> ${item.notificationType || 'slack'}</p>
+                        <div class="url-field">
+                            <strong>通知URL:</strong><br>
+                            ${item.notificationUrl || item.slackWebhookUrl || '未設定'}
+                        </div>
+                        <p><strong>登録日:</strong> ${item.createdAt || '不明'}</p>
+                        <p><strong>ID:</strong> ${item.examId}</p>
+                    `;
+                    
+                    itemsEl.appendChild(div);
+                });
+            } catch (error) {
+                errorEl.textContent = 'エラーが発生しました: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
