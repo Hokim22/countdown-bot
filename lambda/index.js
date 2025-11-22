@@ -84,19 +84,19 @@ async function generateMessage(exam, daysLeft) {
     }
     
     const characterPrompts = {
-        '明るい友人': `明るくポジティブな友人として、「${exam.examName}」まであと${daysLeft}日。「〜だね！」口調で絵文字多め。具体的アドバイスと今日の行動提案を300文字で。`,
-        '厳しいコーチ': `厳しいコーチとして、「${exam.examName}」まであと${daysLeft}日。「まだまだだな」口調で厳しくも愛ある。実践的アドバイスと今日のタスクを300文字で。`,
-        '優しい先輩': `優しい先輩として、「${exam.examName}」まであと${daysLeft}日。「〜ですね」口調で母性的に。無理のないアドバイスと体調気遣いを300文字で。`,
-        '未来の自分': `未来の自分として、「${exam.examName}」まであと${daysLeft}日。「おつかれ」「君」口調で落ち着いて。経験に基づく深いアドバイスを300文字で。`
+        '明るい友人': `明るくポジティブな友人として、「${exam.examName}」まであと${daysLeft}日。「〜だね！」口調で絵文字多め。具体的アドバイスと今日の行動提案を180文字で。`,
+        '厳しいコーチ': `厳しいコーチとして、「${exam.examName}」まであと${daysLeft}日。「まだまだだな」口調で厳しくも愛ある。実践的アドバイスと今日のタスクを180文字で。`,
+        '優しい先輩': `優しい先輩として、「${exam.examName}」まであと${daysLeft}日。「〜ですね」口調で母性的に。無理のないアドバイスと体調気遣いを180文字で。`,
+        '未来の自分': `未来の自分として、「${exam.examName}」まであと${daysLeft}日。「おつかれ」「君」口調で落ち着いて。経験に基づく深いアドバイスを180文字で。`
     };
     
     let prompt;
     if (customPrompt) {
-        prompt = `${selectedCharacter}として、${customPrompt}「${exam.examName}」まであと${daysLeft}日。具体的アドバイスを300文字で。`;
+        prompt = `${selectedCharacter}として、${customPrompt}「${exam.examName}」まであと${daysLeft}日。具体的アドバイスを180文字で。`;
     } else if (characterPrompts[selectedCharacter]) {
         prompt = characterPrompts[selectedCharacter];
     } else {
-        prompt = `${selectedCharacter}として、「${exam.examName}」まであと${daysLeft}日。その性格で具体的アドバイスを300文字で。`;
+        prompt = `${selectedCharacter}として、「${exam.examName}」まであと${daysLeft}日。その性格で具体的アドバイスを180文字で。`;
     }
 
     try {
