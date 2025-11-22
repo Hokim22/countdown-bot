@@ -24,7 +24,7 @@ resource "aws_lambda_function_url" "manage_url" {
 
   cors {
     allow_origins = ["*"]
-    allow_methods = ["GET", "DELETE", "OPTIONS"]
+    allow_methods = ["*"]
     allow_headers = ["Content-Type"]
     max_age       = 86400
   }
