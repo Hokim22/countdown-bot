@@ -96,8 +96,11 @@ resource "aws_lambda_function" "register_bot" {
   environment {
     variables = {
       DYNAMODB_TABLE = aws_dynamodb_table.exam_countdown.name
+      LAMBDA_ARN     = aws_lambda_function.countdown_bot.arn
     }
   }
+
+  depends_on = [aws_lambda_function.countdown_bot]
 }
 
 # Lambda Function URL

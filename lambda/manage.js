@@ -6,18 +6,7 @@ const dynamoClient = new DynamoDBClient({ region: 'ap-northeast-1' });
 const eventBridgeClient = new EventBridgeClient({ region: 'ap-northeast-1' });
 
 exports.handler = async (event) => {
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
-        'Content-Type': 'application/json'
-    };
-
     const method = event.requestContext?.http?.method || event.httpMethod;
-
-    if (method === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
-    }
 
     try {
         const examId = event.queryStringParameters?.id;
@@ -28,7 +17,6 @@ exports.handler = async (event) => {
             if (adminKey !== process.env.ADMIN_KEY) {
                 return {
                     statusCode: 403,
-                    headers,
                     body: JSON.stringify({ error: 'Forbidden' })
                 };
             }
@@ -41,7 +29,6 @@ exports.handler = async (event) => {
             
             return {
                 statusCode: 200,
-                headers,
                 body: JSON.stringify({ items })
             };
         }
@@ -49,7 +36,6 @@ exports.handler = async (event) => {
         if (!examId) {
             return {
                 statusCode: 400,
-                headers,
                 body: JSON.stringify({ error: 'Missing id parameter' })
             };
         }
@@ -64,14 +50,12 @@ exports.handler = async (event) => {
             if (!result.Item) {
                 return {
                     statusCode: 404,
-                    headers,
                     body: JSON.stringify({ error: 'Not found' })
                 };
             }
 
             return {
                 statusCode: 200,
-                headers,
                 body: JSON.stringify(unmarshall(result.Item))
             };
         } else if (method === 'DELETE') {
@@ -97,21 +81,18 @@ exports.handler = async (event) => {
 
             return {
                 statusCode: 200,
-                headers,
                 body: JSON.stringify({ success: true })
             };
         }
 
         return {
             statusCode: 405,
-            headers,
             body: JSON.stringify({ error: 'Method not allowed' })
         };
     } catch (error) {
         console.error('Error:', error);
         return {
             statusCode: 500,
-            headers,
             body: JSON.stringify({ error: 'Internal server error' })
         };
     }

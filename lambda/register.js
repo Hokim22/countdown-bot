@@ -7,28 +7,16 @@ const dynamoClient = new DynamoDBClient({ region: 'ap-northeast-1' });
 const eventBridgeClient = new EventBridgeClient({ region: 'ap-northeast-1' });
 
 exports.handler = async (event) => {
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Content-Type': 'application/json'
-    };
-
     const method = event.requestContext?.http?.method || event.httpMethod;
-
-    // OPTIONSリクエスト対応
-    if (method === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
-    }
 
     // GETリクエスト（favicon等）を無視
     if (method === 'GET') {
-        return { statusCode: 404, headers, body: JSON.stringify({ error: 'Not Found' }) };
+        return { statusCode: 404, body: JSON.stringify({ error: 'Not Found' }) };
     }
 
     // POST以外は拒否
     if (method !== 'POST') {
-        return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+        return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
     }
 
     try {
@@ -40,7 +28,6 @@ exports.handler = async (event) => {
         if (!body) {
             return {
                 statusCode: 400,
-                headers,
                 body: JSON.stringify({ error: 'No body provided' })
             };
         }
@@ -49,7 +36,6 @@ exports.handler = async (event) => {
         if (!body.examName || !body.targetDate || !body.characters || !body.notificationType || !body.notificationUrl) {
             return {
                 statusCode: 400,
-                headers,
                 body: JSON.stringify({ error: 'Missing required fields' })
             };
         }
@@ -57,7 +43,6 @@ exports.handler = async (event) => {
         if (!Array.isArray(body.characters) || body.characters.length === 0) {
             return {
                 statusCode: 400,
-                headers,
                 body: JSON.stringify({ error: 'At least one character is required' })
             };
         }
@@ -72,7 +57,6 @@ exports.handler = async (event) => {
         if (targetDate < today) {
             return {
                 statusCode: 400,
-                headers,
                 body: JSON.stringify({ error: 'Target date must be today or in the future' })
             };
         }
@@ -124,14 +108,12 @@ exports.handler = async (event) => {
 
         return {
             statusCode: 200,
-            headers,
             body: JSON.stringify({ success: true, examId })
         };
     } catch (error) {
         console.error('Error:', error);
         return {
             statusCode: 500,
-            headers,
             body: JSON.stringify({ error: 'Internal server error' })
         };
     }
