@@ -1,8 +1,10 @@
 const { DynamoDBClient, PutItemCommand } = require('@aws-sdk/client-dynamodb');
 const { marshall } = require('@aws-sdk/util-dynamodb');
+const { EventBridgeClient, PutRuleCommand, PutTargetsCommand } = require('@aws-sdk/client-eventbridge');
 const { randomUUID } = require('crypto');
 
 const dynamoClient = new DynamoDBClient({ region: 'ap-northeast-1' });
+const eventBridgeClient = new EventBridgeClient({ region: 'ap-northeast-1' });
 
 exports.handler = async (event) => {
     const headers = {
@@ -91,6 +93,33 @@ exports.handler = async (event) => {
         await dynamoClient.send(new PutItemCommand({
             TableName: process.env.DYNAMODB_TABLE,
             Item: marshall(item)
+        }));
+
+        // EventBridgeルールを作成
+        const [hour, minute] = notificationTime.split(':');
+        const cronExpression = `cron(${minute} ${hour} * * ? *)`; // JSTの時間をUTCに変換が必要
+        
+        // JSTかUTCに変換
+        let utcHour = parseInt(hour) - 9;
+        if (utcHour < 0) utcHour += 24;
+        const utcCron = `cron(${minute} ${utcHour} * * ? *)`;
+        
+        const ruleName = `countdown-${examId}`;
+        
+        await eventBridgeClient.send(new PutRuleCommand({
+            Name: ruleName,
+            ScheduleExpression: utcCron,
+            State: 'ENABLED',
+            Description: `Countdown notification for ${body.examName}`
+        }));
+        
+        await eventBridgeClient.send(new PutTargetsCommand({
+            Rule: ruleName,
+            Targets: [{
+                Id: '1',
+                Arn: process.env.LAMBDA_ARN,
+                Input: JSON.stringify({ examId })
+            }]
         }));
 
         return {

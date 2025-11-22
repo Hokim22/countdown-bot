@@ -1,7 +1,9 @@
 const { DynamoDBClient, GetItemCommand, DeleteItemCommand } = require('@aws-sdk/client-dynamodb');
 const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
+const { EventBridgeClient, RemoveTargetsCommand, DeleteRuleCommand } = require('@aws-sdk/client-eventbridge');
 
 const dynamoClient = new DynamoDBClient({ region: 'ap-northeast-1' });
+const eventBridgeClient = new EventBridgeClient({ region: 'ap-northeast-1' });
 
 exports.handler = async (event) => {
     const headers = {
@@ -49,7 +51,21 @@ exports.handler = async (event) => {
                 body: JSON.stringify(unmarshall(result.Item))
             };
         } else if (method === 'DELETE') {
-            // 削除
+            // EventBridgeルールを削除
+            const ruleName = `countdown-${examId}`;
+            try {
+                await eventBridgeClient.send(new RemoveTargetsCommand({
+                    Rule: ruleName,
+                    Ids: ['1']
+                }));
+                await eventBridgeClient.send(new DeleteRuleCommand({
+                    Name: ruleName
+                }));
+            } catch (error) {
+                console.log('EventBridge rule not found or already deleted:', error.message);
+            }
+            
+            // DynamoDBから削除
             await dynamoClient.send(new DeleteItemCommand({
                 TableName: process.env.DYNAMODB_TABLE,
                 Key: marshall({ examId })

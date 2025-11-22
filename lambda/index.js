@@ -1,4 +1,4 @@
-const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, ScanCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { unmarshall } = require('@aws-sdk/util-dynamodb');
 const axios = require('axios');
 
@@ -9,15 +9,29 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 exports.handler = async (event) => {
     try {
-        const scanCommand = new ScanCommand({
-            TableName: process.env.DYNAMODB_TABLE
-        });
-        
-        const result = await dynamoClient.send(scanCommand);
-        const exams = result.Items.map(item => unmarshall(item));
-        
-        for (const exam of exams) {
-            await processExam(exam);
+        // EventBridgeからexamIdが渡される場合
+        if (event.examId) {
+            const result = await dynamoClient.send(new GetItemCommand({
+                TableName: process.env.DYNAMODB_TABLE,
+                Key: require('@aws-sdk/util-dynamodb').marshall({ examId: event.examId })
+            }));
+            
+            if (result.Item) {
+                const exam = unmarshall(result.Item);
+                await processExam(exam);
+            }
+        } else {
+            // 後方互換性: 全件処理（手動実行時）
+            const scanCommand = new ScanCommand({
+                TableName: process.env.DYNAMODB_TABLE
+            });
+            
+            const result = await dynamoClient.send(scanCommand);
+            const exams = result.Items.map(item => unmarshall(item));
+            
+            for (const exam of exams) {
+                await processExam(exam);
+            }
         }
         
         return { statusCode: 200, body: 'Success' };
