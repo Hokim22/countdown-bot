@@ -89,7 +89,7 @@ async function generateMessage(exam, daysLeft) {
 目標: ${exam.examName}
 残り日数: ${daysLeft}日
 
-以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
 1. 残り日数に対する明るいコメント
 2. 「${exam.examName}」という目標に特化した具体的なアドバイス（例：ダイエットなら食事や運動、TOEICなら勉強法など）
 3. 今日やるべき具体的な行動提案
@@ -101,7 +101,7 @@ async function generateMessage(exam, daysLeft) {
 目標: ${exam.examName}
 残り日数: ${daysLeft}日
 
-以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
 1. 厳しい現状認識
 2. 「${exam.examName}」という目標に特化した実践的で具体的なアドバイス（例：ダイエットなら食事管理や運動メニュー、TOEICなら学習計画など）
 3. 今日必ずやるべき具体的なタスク
@@ -113,7 +113,7 @@ async function generateMessage(exam, daysLeft) {
 目標: ${exam.examName}
 残り日数: ${daysLeft}日
 
-以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
 1. 優しい労いの言葉
 2. 「${exam.examName}」という目標に特化した無理のない具体的なアドバイス（例：ダイエットなら健康的な方法、TOEICなら効率的な学習法など）
 3. 体調管理や休息についての気遣い
@@ -125,7 +125,7 @@ async function generateMessage(exam, daysLeft) {
 目標: ${exam.examName}
 残り日数: ${daysLeft}日
 
-以下の内容を含む、バリエーション豊かで具体的なメッセージを500文字程度で作成してください：
+以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
 1. 未来の視点からの落ち着いたコメント
 2. 「${exam.examName}」という目標に特化した、経験に基づく深い具体的なアドバイス
 3. この経験が将来どう役立つかの示唆
@@ -142,7 +142,7 @@ async function generateMessage(exam, daysLeft) {
 目標: ${exam.examName}
 残り日数: ${daysLeft}日
 
-そのキャラクターらしく、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する500文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
+そのキャラクターらしく、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
     } else if (characterPrompts[selectedCharacter]) {
         // プリセットキャラクター
         prompt = characterPrompts[selectedCharacter];
@@ -153,7 +153,7 @@ async function generateMessage(exam, daysLeft) {
 目標: ${exam.examName}
 残り日数: ${daysLeft}日
 
-${selectedCharacter}らしい性格や口調で、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する500文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
+${selectedCharacter}らしい性格や口調で、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
     }
 
     try {
@@ -165,7 +165,7 @@ ${selectedCharacter}らしい性格や口調で、「${exam.examName}」とい�
 
         const response = await axios.post(url, {
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 800, temperature: 1.3 }
+            generationConfig: { maxOutputTokens: 500, temperature: 1.3 }
         }, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 10000
