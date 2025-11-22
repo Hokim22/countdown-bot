@@ -84,76 +84,19 @@ async function generateMessage(exam, daysLeft) {
     }
     
     const characterPrompts = {
-        '明るい友人': `あなたは明るくポジティブな友人です。「〜だね！」「〜だよ！」という口調で話します。絵文字を多めに使って楽しさを伝えます。
-
-目標: ${exam.examName}
-残り日数: ${daysLeft}日
-
-以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
-1. 残り日数に対する明るいコメント
-2. 「${exam.examName}」という目標に特化した具体的なアドバイス（例：ダイエットなら食事や運動、TOEICなら勉強法など）
-3. 今日やるべき具体的な行動提案
-4. 励ましの言葉
-
-毎回異なる表現や視点を使って、新鮮なメッセージにしてください。`,
-        '厳しいコーチ': `あなたは厳しいコーチです。「まだまだだな」「もっとできる」という厳しい口調ですが、最終的には応援してくれます。
-
-目標: ${exam.examName}
-残り日数: ${daysLeft}日
-
-以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
-1. 厳しい現状認識
-2. 「${exam.examName}」という目標に特化した実践的で具体的なアドバイス（例：ダイエットなら食事管理や運動メニュー、TOEICなら学習計画など）
-3. 今日必ずやるべき具体的なタスク
-4. 最後に熱い応援メッセージ
-
-毎回異なる角度から厳しくも愛のあるメッセージを送ってください。`,
-        '優しい先輩': `あなたは優しい先輩です。「〜ですね」「〜ましょう」という丁寧な口調で、いつも母性的に心配してくれます。
-
-目標: ${exam.examName}
-残り日数: ${daysLeft}日
-
-以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
-1. 優しい労いの言葉
-2. 「${exam.examName}」という目標に特化した無理のない具体的なアドバイス（例：ダイエットなら健康的な方法、TOEICなら効率的な学習法など）
-3. 体調管理や休息についての気遣い
-4. 温かい応援メッセージ
-
-毎回異なる優しい表現で、心に寄り添うメッセージを送ってください。`,
-        '未来の自分': `あなたは未来の自分です。落ち着いていて、「おつかれ」「君」「だね」などの口調で話します。経験者としての知恵を持っています。
-
-目標: ${exam.examName}
-残り日数: ${daysLeft}日
-
-以下の内容を含む、バリエーション豊かで具体的なメッセージを300文字程度で作成してください：
-1. 未来の視点からの落ち着いたコメント
-2. 「${exam.examName}」という目標に特化した、経験に基づく深い具体的なアドバイス
-3. この経験が将来どう役立つかの示唆
-4. 自分を信じることの大切さ
-
-毎回異なる深い洞察を含む、示唆に富んだメッセージを送ってください。`
+        '明るい友人': `明るくポジティブな友人として、「${exam.examName}」まであと${daysLeft}日。「〜だね！」口調で絵文字多め。具体的アドバイスと今日の行動提案を300文字で。`,
+        '厳しいコーチ': `厳しいコーチとして、「${exam.examName}」まであと${daysLeft}日。「まだまだだな」口調で厳しくも愛ある。実践的アドバイスと今日のタスクを300文字で。`,
+        '優しい先輩': `優しい先輩として、「${exam.examName}」まであと${daysLeft}日。「〜ですね」口調で母性的に。無理のないアドバイスと体調気遣いを300文字で。`,
+        '未来の自分': `未来の自分として、「${exam.examName}」まであと${daysLeft}日。「おつかれ」「君」口調で落ち着いて。経験に基づく深いアドバイスを300文字で。`
     };
     
     let prompt;
     if (customPrompt) {
-        // カスタムプロンプトがある場合
-        prompt = `あなたは${selectedCharacter}です。${customPrompt}
-
-目標: ${exam.examName}
-残り日数: ${daysLeft}日
-
-そのキャラクターらしく、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
+        prompt = `${selectedCharacter}として、${customPrompt}「${exam.examName}」まであと${daysLeft}日。具体的アドバイスを300文字で。`;
     } else if (characterPrompts[selectedCharacter]) {
-        // プリセットキャラクター
         prompt = characterPrompts[selectedCharacter];
     } else {
-        // キャラクター名のみ指定（AIが自動で性格を考える）
-        prompt = `あなたは${selectedCharacter}です。
-
-目標: ${exam.examName}
-残り日数: ${daysLeft}日
-
-${selectedCharacter}らしい性格や口調で、「${exam.examName}」という目標に特化した具体的で実用的なアドバイス付きで応援する300文字程度のメッセージを作成してください。毎回異なる視点や表現を使って、バリエーション豊かなメッセージにしてください。`;
+        prompt = `${selectedCharacter}として、「${exam.examName}」まであと${daysLeft}日。その性格で具体的アドバイスを300文字で。`;
     }
 
     try {
@@ -167,17 +110,19 @@ ${selectedCharacter}らしい性格や口調で、「${exam.examName}」とい�
 
         const response = await axios.post(url, {
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 500, temperature: 1.3 }
+            generationConfig: { maxOutputTokens: 1024, temperature: 1.3 }
         }, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 20000
         });
         
         console.log('Gemini API response received successfully');
+        console.log('Response:', JSON.stringify(response.data));
 
         const aiMessage = response.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
         
         if (!aiMessage) {
+            console.error('Candidates:', JSON.stringify(response.data.candidates));
             throw new Error('No AI message generated');
         }
 
