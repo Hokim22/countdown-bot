@@ -3,7 +3,7 @@ resource "aws_lambda_function" "manage_bot" {
   filename         = "../lambda/manage-bot.zip"
   function_name    = "countdown-manage-bot"
   role            = aws_iam_role.lambda_role.arn
-  handler         = "manage.handler"
+  handler         = "index.handler"
   runtime         = "nodejs18.x"
   timeout         = 30
 
