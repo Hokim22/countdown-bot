@@ -63,13 +63,15 @@ exports.handler = async (event) => {
         // 通知時間のデフォルトは9:00 (JST)
         const notificationTime = body.notificationTime || '09:00';
 
-        // 日付チェック
+        // 日付チェック（今日以降なOK）
         const targetDate = new Date(body.targetDate);
-        if (targetDate < new Date()) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (targetDate < today) {
             return {
                 statusCode: 400,
                 headers,
-                body: JSON.stringify({ error: 'Target date must be in the future' })
+                body: JSON.stringify({ error: 'Target date must be today or in the future' })
             };
         }
 
