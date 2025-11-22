@@ -110,7 +110,10 @@ async function generateMessage(exam, daysLeft) {
 
         const response = await axios.post(url, {
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 1024, temperature: 1.3 }
+            generationConfig: { 
+                maxOutputTokens: 2048, 
+                temperature: 1.3
+            }
         }, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 20000
