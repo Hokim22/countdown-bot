@@ -148,11 +148,17 @@ async function sendNotification(exam, message) {
     try {
         switch (type) {
             case 'slack':
-            case 'discord':
                 await axios.post(url, {
                     text: message,
                     username: 'カウントダウンBot',
                     icon_emoji: ':books:'
+                });
+                break;
+
+            case 'discord':
+                await axios.post(url, {
+                    content: message,
+                    username: 'カウントダウンBot'
                 });
                 break;
 
